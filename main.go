@@ -1,9 +1,9 @@
 /***
 
 	This app is sponsored by business @ xparts.lv 2021
-		- Code written by Naru Koshin (Github: https://github.com/narukoshin)
-		- This code is open source and available at https://github.com/narukoshin/csv-convert
-
+		- Code written by Naru Koshin
+		- Github: https://github.com/narukoshin
+		- Instagram: https://www.instagram.com/naru.koshin
 ***/
 
 package main

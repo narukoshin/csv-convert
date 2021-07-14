@@ -17,6 +17,27 @@ import (
 	"time"
 )
 
+func CsvReader(name string) [][]string{
+	file, err := os.Open(name)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	reader.Comma = ';'
+	reader.LazyQuotes = true
+
+	data, err := reader.ReadAll()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("CSV: %s was loaded", name)
+
+	return data
+
+}
+
 func main(){
 	// creating logs
 	logs, err := os.Create("runtime.log")
@@ -25,88 +46,35 @@ func main(){
 	}
 	defer logs.Close()
 	log.SetOutput(logs)
+	log.Println("Runtime log started")
 
+	// starting count elapsed time
 	start := time.Now()
-	// reading the file
-	file, err := os.Open("3103900.csv")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
+	log.Println("Time counter started")
 
-	// starting reading the csv file
-	reader := csv.NewReader(file)
-	reader.Comma = ';'
-	reader.LazyQuotes = true
+	// reading 3103900.csv
+	data := CsvReader("3103900.csv")
 
-	// converting csv to array
-	data, err := reader.ReadAll()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// reading STANY.csv
+	data2 := CsvReader("STANY.csv")
 
-	// reading second file
+	// reading INDEKS_PARAMETR.csv
+	data3 := CsvReader("INDEKS_PARAMETR.csv")
 
-	file2, err := os.Open("STANY.csv")
-	if err != nil {
-		log.Fatal(err)
-	}
+	// reading 3103900_KAUCJE.csv
+	data4 := CsvReader("3103900_KAUCJE.csv")
 
-	// reading second file csv
-	reader2 := csv.NewReader(file2)
-	reader2.Comma = ';'
-	reader2.LazyQuotes = true
-
-	data2, err := reader2.ReadAll()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// opening third csv file
-	file3, err := os.Open("INDEKS_PARAMETR.csv")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file3.Close()
-
-	// reading csv from third file
-	reader3 := csv.NewReader(file3)
-	reader3.Comma = ';'
-	reader3.LazyQuotes = true
-
-	data3, err := reader3.ReadAll()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// opening fourth csv file
-	file4, err := os.Open("3103900_KAUCJE.csv")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file4.Close()
-
-	// reading csv from fourth file
-	reader4 := csv.NewReader(file4)
-	reader4.Comma = ';'
-	reader4.LazyQuotes = true
-
-	data4, err := reader4.ReadAll()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	
 	// creating output file
+	log.Println("CSV: compiled.csv was created")
 	CREATE:
 	var writerF *os.File
-	if _, err := os.Stat("result.csv"); os.IsNotExist(err) {
-		writerF, err = os.Create("result.csv")
+	if _, err := os.Stat("compiled.csv"); os.IsNotExist(err) {
+		writerF, err = os.Create("compiled.csv")
 		if err != nil {
 			log.Fatal(err)
 		}
 	} else {
-		os.Remove("result.csv")
+		os.Remove("compiled.csv")
 		goto CREATE
 	}
 	defer writerF.Close()
@@ -116,6 +84,7 @@ func main(){
 	writer.Comma = ';'
 
 	// main file - 3103900.csv
+	log.Println("Starting combine all files into one")
 	var i int
 	for _, k := range data {
 		i++
@@ -153,4 +122,5 @@ func main(){
 	}
 	elapsed := time.Since(start)
 	fmt.Println(elapsed)
+	log.Printf("FINISHED: Elapsed time: %s\n", elapsed)
 }

@@ -18,6 +18,14 @@ import (
 )
 
 func main(){
+	// creating logs
+	logs, err := os.Create("runtime.log")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer logs.Close()
+	log.SetOutput(logs)
+
 	start := time.Now()
 	// reading the file
 	file, err := os.Open("3103900.csv")

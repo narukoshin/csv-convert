@@ -10,6 +10,7 @@ package main
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -17,10 +18,16 @@ import (
 	"time"
 )
 
-func CsvReader(name string) [][]string{
-	file, err := os.Open(name)
+const L_DELETE 			= "delete"
+const L_CREATE 			= "create"
+const L_FNAME  			= ".naruconv_lock"
+var	  ErrFileExists		= errors.New(fmt.Sprintf("error: the process is already running, if it's not, then please delete %s file.", L_FNAME))
+
+func CsvReader(name string) (data [][]string, err error){
+	var file *os.File
+	file, err = os.Open(name)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	defer file.Close()
 
@@ -28,17 +35,37 @@ func CsvReader(name string) [][]string{
 	reader.Comma = ';'
 	reader.LazyQuotes = true
 
-	data, err := reader.ReadAll()
+	data, err = reader.ReadAll()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	log.Printf("CSV: %s was loaded", name)
 
-	return data
+	return data, nil
 
 }
 
+// this function creates a locker that tells that script is still working and the result file is not ready
+func Locker(action string) (err error){
+	if action == L_DELETE {
+		os.Remove(L_FNAME)
+	} else if action == L_CREATE {
+		if _, err := os.Stat(L_FNAME); !os.IsNotExist(err) {
+			return ErrFileExists
+		}
+		os.Create(L_FNAME)
+	}
+	return
+}
+
 func main(){
+	// creating a locker
+	err := Locker(L_CREATE)
+	if err != nil {
+		// writing to runtime.log file that we failed to run a script
+		log.Fatal(err)
+	}
+	defer Locker(L_DELETE)
 	// creating logs
 	logs, err := os.Create("runtime.log")
 	if err != nil {
@@ -53,16 +80,32 @@ func main(){
 	log.Println("Time counter started")
 
 	// reading 3103900.csv
-	data := CsvReader("3103900.csv")
+	data, err := CsvReader("3103900.csv")
+	if err != nil {
+		Locker(L_DELETE)
+		log.Fatal(err)
+	}
 
 	// reading STANY.csv
-	data2 := CsvReader("STANY.csv")
+	data2, err := CsvReader("STANY.csv")
+	if err != nil {
+		Locker(L_DELETE)
+		log.Fatal(err)
+	}
 
 	// reading INDEKS_PARAMETR.csv
-	data3 := CsvReader("INDEKS_PARAMETR.csv")
+	data3, err := CsvReader("INDEKS_PARAMETR.csv")
+	if err != nil {
+		Locker(L_DELETE)
+		log.Fatal(err)
+	}
 
 	// reading 3103900_KAUCJE.csv
-	data4 := CsvReader("3103900_KAUCJE.csv")
+	data4, err := CsvReader("3103900_KAUCJE.csv")
+	if err != nil {
+		Locker(L_DELETE)
+		log.Fatal(err)
+	}
 
 	// creating output file
 	log.Println("CSV: compiled.csv was created")
@@ -71,6 +114,7 @@ func main(){
 	if _, err := os.Stat("compiled.csv"); os.IsNotExist(err) {
 		writerF, err = os.Create("compiled.csv")
 		if err != nil {
+			Locker(L_DELETE)
 			log.Fatal(err)
 		}
 	} else {

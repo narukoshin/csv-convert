@@ -85,10 +85,7 @@ func main(){
 
 	// main file - 3103900.csv
 	log.Println("Starting combine all files into one")
-	var i int
 	for _, k := range data {
-		i++
-		fmt.Println(i)
 		// second file - STANY.csv
 		identifier := k[0]
 		price, _ := strconv.ParseFloat(k[5], 64)

@@ -2,17 +2,19 @@
 
 # the script file name to run
 script_name="main"
+filelock_name=".naruconv.lock"
 
 # checking if the script is already running
-process_running=$(ps aux | grep $script_name | grep -v "grep $script_name")
+process_running=$(ps aux | egrep "$script_name$" | grep -v grep)
 
 if [ -n "$process_running" ]; then
 	echo $process_running
 else
 	# checking if the lock file exists
-	if [ -f ".naruconv_lock" ]; then
+	if [ -f "$filelock_name" ]; then
 		# deleting the lock file to safely run a script
-		rm -rf .naruconv_lock
+		rm -rf $filelock_name
+		echo "*** Starting a compiler..."
 	fi
 fi
 

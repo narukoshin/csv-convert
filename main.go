@@ -20,8 +20,11 @@ import (
 
 const L_DELETE 			= "delete"
 const L_CREATE 			= "create"
-const L_FNAME  			= ".naruconv_lock"
+const L_FNAME  			= ".naruconv.lock"
 var	  ErrFileExists		= errors.New(fmt.Sprintf("error: the process is already running, if it's not, then please delete %s file.", L_FNAME))
+
+var WORK_FILE string	= "compiled.csv.lock"
+var FIN_FILE  string	= "compiled.csv"
 
 func CsvReader(name string) (data [][]string, err error){
 	var file *os.File
@@ -108,17 +111,17 @@ func main(){
 	}
 
 	// creating output file
-	log.Println("CSV: compiled.csv was created")
+	log.Println("CSV: compiled.csv.lock was created")
 	CREATE:
 	var writerF *os.File
-	if _, err := os.Stat("compiled.csv"); os.IsNotExist(err) {
-		writerF, err = os.Create("compiled.csv")
+	if _, err := os.Stat(WORK_FILE); os.IsNotExist(err) {
+		writerF, err = os.Create(WORK_FILE)
 		if err != nil {
 			Locker(L_DELETE)
 			log.Fatal(err)
 		}
 	} else {
-		os.Remove("compiled.csv")
+		os.Remove(WORK_FILE)
 		goto CREATE
 	}
 	defer writerF.Close()
@@ -161,6 +164,22 @@ func main(){
 			}
 		}
 	}
+	// when the work is finished, moving the file from lock to csv
+	// checking if the compiled.csv exists, if exists then we will dete it.
+	if _, err := os.Stat(FIN_FILE); !os.IsNotExist(err) {
+		// deleting the old compiled code
+		err = os.Remove(FIN_FILE)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	// moving compiled.csv.lock to compiled.csv
+	log.Printf("CSV: Moving %s to %s\n", WORK_FILE, FIN_FILE)
+	err = os.Rename(WORK_FILE, FIN_FILE)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 	elapsed := time.Since(start)
 	fmt.Println(elapsed)
 	log.Printf("FINISHED: Elapsed time: %s\n", elapsed)

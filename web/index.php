@@ -22,6 +22,7 @@
             width: 23rem;
         }
         #app button {
+            color: #fff;
             display: block;
             padding: 10px;
             border-radius: 200px;
@@ -63,6 +64,7 @@
             box-shadow: 0 0 20px 0px #205e22 !important;
         }
         .statuss {
+            color: #fff;
             background-color: #1a1616;
             padding: 25px;
             margin-bottom: 2rem;

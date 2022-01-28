@@ -122,7 +122,12 @@
          * @return int
          */
         private function getPID(): int{
-            return explode(" ", shell_exec("ps aux | egrep '{$this->compilerName}$' | grep -v grep"))[1];
+            $cmd = explode(" ", shell_exec("ps aux | egrep $this->compilerName$ | grep -v grep"));
+            $processData = [];
+            foreach($cmd as $key => $value) {
+                    if (empty($value)){ unset($cmd[$key]); } else array_push($processData, $value);
+            }
+            return $processData[1];
         }
         /**
          * Downloading a compiled csv file

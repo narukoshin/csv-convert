@@ -52,6 +52,16 @@
             background-color: #491612 !important;
             box-shadow: 0 0 20px 0px #491612 !important;
         }
+        #app button#download-file {
+            box-shadow: 0 0 20px 0px #339a37;
+            border: 3px solid #339a37;
+            background-color: #339a37
+        }
+        #app button#download-file:hover {
+            border-color: #205e22 !important;
+            background-color: #205e22 !important;
+            box-shadow: 0 0 20px 0px #205e22 !important;
+        }
         .statuss {
             background-color: #1a1616;
             padding: 25px;
@@ -102,6 +112,7 @@
         <!-- sone action buttons --> 
         <button v-on:click="startCompiler" id="start-compiler">Start a compiler</button>
         <button v-on:click="killCompiler" id="kill-compiler">Kill a process</button>
+        <button v-on:click="downloadFile" id="download-file">Download file</button>
     </div>
     <script src="vendor/node_modules/vue/dist/vue.min.js"></script>
     <script>
@@ -143,6 +154,9 @@
                             body: JSON.stringify({"action":"killCompiler"})
                         })
                     }
+                },
+                downloadFile(){
+                    window.open("download.php")
                 },
             },
             created(){

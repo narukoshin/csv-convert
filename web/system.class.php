@@ -3,7 +3,7 @@
         /**
          * @var string
          */
-        private string $rootDir;
+        public string $rootDir;
         /**
          * @var string
          */
@@ -123,5 +123,26 @@
          */
         private function getPID(): int{
             return explode(" ", shell_exec("ps aux | egrep '{$this->compilerName}$' | grep -v grep"))[1];
+        }
+        /**
+         * Downloading a compiled csv file
+         * 
+         * @return void
+         */
+        public function downloadFile(){
+            $filepath = sprintf("%s/compiled.csv", $this->rootDir);
+            if (!file_exists($filepath)) {
+                echo json_encode(["statuss" => "D_NOFILE", "message" => sprintf("File %s does not exists", basename($filepath))]);
+                return;
+            }
+            header("Content-Description: File Transfer");
+            header("Content-Type: application/octet-stream");
+            header("Content-Disposition: attachment; " . sprintf("filename=%s", basename($filepath)));
+            header("Expires: 0");
+            header("Cache-Control: must-revalidate");
+            header("Pragma: public");
+            header("Content-Length: " . filesize($filepath));
+            flush();
+            readfile($filepath);
         }
     }

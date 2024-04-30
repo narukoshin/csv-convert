@@ -35,6 +35,7 @@ func CsvReader(name string) (data [][]string, err error){
 	defer file.Close()
 
 	reader := csv.NewReader(file)
+	reader.FieldsPerRecord = -1
 	reader.Comma = ';'
 	reader.LazyQuotes = true
 
